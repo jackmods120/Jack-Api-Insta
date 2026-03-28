@@ -1,53 +1,36 @@
 "use client";
 
 import React from "react";
-
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Download, Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
+  Form, FormControl, FormField, FormItem, FormMessage,
 } from "@/components/ui/form";
-
 import { Input } from "@/components/ui/input";
-
 import { downloadFile } from "@/lib/utils";
 import { getHttpErrorMessage } from "@/lib/http";
-
 import { useVideoInfo } from "@/services/api/queries";
 
 const formSchema = z.object({
-  postUrl: z.string().url({
-    message: "Provide a valid Instagram post link",
-  }),
+  postUrl: z.string().url({ message: "Provide a valid Instagram post link" }),
 });
 
 export function InstagramVideoForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      postUrl: "",
-    },
+    defaultValues: { postUrl: "" },
   });
 
   const { error, isPending, mutateAsync: getVideoInfo } = useVideoInfo();
-
   const httpError = getHttpErrorMessage(error);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { postUrl } = values;
     try {
-      console.log("getting video info", postUrl);
       const videoInfo = await getVideoInfo({ postUrl });
-
       const { filename, videoUrl } = videoInfo;
       downloadFile(videoUrl, { filename });
     } catch (error: any) {
@@ -59,23 +42,25 @@ export function InstagramVideoForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="bg-accent/20 my-4 flex w-full max-w-2xl flex-col items-center rounded-lg border px-4 pb-16 pt-8 shadow-md sm:px-8"
+        className="ios-card w-full max-w-2xl p-4 sm:p-6"
       >
-        <div className="mb-2 h-6 w-full px-2 text-start text-red-500">
-          {httpError}
-        </div>
-        <div className="relative mb-6 flex w-full flex-col items-center gap-4 sm:flex-row">
+        {httpError && (
+          <div className="mb-3 rounded-xl bg-destructive/10 px-4 py-2 text-sm text-destructive">
+            {httpError}
+          </div>
+        )}
+        <div className="flex flex-col gap-3 sm:flex-row">
           <FormField
             control={form.control}
             name="postUrl"
             render={({ field }) => (
-              <FormItem className="w-full">
+              <FormItem className="flex-1">
                 <FormControl>
                   <Input
                     disabled={isPending}
                     type="url"
-                    placeholder="Paste your Instagram link here..."
-                    className="h-12 w-full sm:pr-28"
+                    placeholder="Paste Instagram link here..."
+                    className="h-12 rounded-xl border-border/60 bg-secondary/50 text-sm placeholder:text-muted-foreground/60 focus-visible:ring-primary"
                     {...field}
                   />
                 </FormControl>
@@ -86,19 +71,18 @@ export function InstagramVideoForm() {
           <Button
             disabled={isPending}
             type="submit"
-            className="right-1 top-1 w-full sm:absolute sm:w-fit"
+            className="h-12 rounded-xl bg-primary px-6 font-semibold text-primary-foreground transition-all duration-150 hover:opacity-90 active:scale-95"
           >
             {isPending ? (
-              <Loader2 className="mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Download className="mr-2" />
+              <Download className="mr-2 h-4 w-4" />
             )}
             Download
           </Button>
         </div>
-        <p className="text-muted-foreground text-center text-xs">
-          If the download opens a new page, right click the video and then click{" "}
-          Save as video.
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          If the download opens a new tab, right-click the video → Save as video.
         </p>
       </form>
     </Form>
