@@ -2,21 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Github,
-  Instagram,
-  Mail,
-  Info,
-  HelpCircle,
-  FileText,
-  Home,
-  Facebook,
-  Youtube,
-  Linkedin,
+  Github, Instagram, Mail, Info, HelpCircle,
+  FileText, Home, Facebook, Youtube, Linkedin,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+
 const links = [
   { href: "/", label: "Home" },
   { href: "/blog", label: "Blog" },
@@ -27,83 +21,102 @@ const links = [
   { href: "/terms", label: "Terms" },
 ];
 
-export  function Navbar() {
+export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow">
+    <nav className="sticky top-0 z-50 ios-glass">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-purple-600">
-          Insta Reel Downloader
+        <Link href="/" className="flex items-center gap-2">
+          <span className="text-xl font-bold gradient-text tracking-tight">
+            Insta Reel ↓
+          </span>
         </Link>
 
         {/* Desktop menu */}
-        <div className="hidden space-x-6 md:flex">
+        <div className="hidden items-center space-x-1 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
                 pathname === link.href
-                  ? "font-semibold text-purple-600"
-                  : "text-gray-700 hover:text-purple-600"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
               {link.label}
             </Link>
           ))}
+          <div className="ml-2">
+            <ThemeToggle />
+          </div>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-gray-700 md:hidden"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
+        {/* Mobile: theme + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            onClick={() => setOpen(!open)}
+            className="rounded-lg p-2 text-muted-foreground transition hover:bg-secondary"
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown */}
-      {open && (
-        <div className="border-t bg-white md:hidden">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`block px-4 py-3 ${
-                pathname === link.href
-                  ? "bg-purple-50 font-semibold text-purple-600"
-                  : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
-              }`}
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden border-t border-border/50 bg-background/95 backdrop-blur md:hidden"
+          >
+            <div className="grid grid-cols-2 gap-1 p-3">
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                    pathname === link.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="mt-20 border-t bg-gradient-to-r from-gray-50 via-purple-50 to-gray-50">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 text-gray-700 sm:grid-cols-2 md:grid-cols-3">
+    <footer className="mt-20 border-t border-border/50 bg-card/50">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 md:grid-cols-3">
         {/* About */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
-          <h3 className="mb-3 text-lg font-semibold text-purple-700">
+          <h3 className="mb-3 text-base font-semibold gradient-text">
             Insta Reel Downloader
           </h3>
-          <p className="text-sm text-gray-600">
-            Free Instagram downloader for videos and Reels. <br />⚡ Fast, 🔒
-            secure, works on all devices.
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Free Instagram downloader for videos and Reels.<br />
+            ⚡ Fast, 🔒 Secure, works on all devices.
           </p>
         </motion.div>
 
@@ -111,11 +124,9 @@ export function Footer() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
-          <h3 className="mb-3 text-lg font-semibold text-purple-700">
-            Quick Links
-          </h3>
+          <h3 className="mb-3 text-base font-semibold text-foreground">Quick Links</h3>
           <ul className="space-y-2 text-sm">
             {[
               { href: "/", label: "Home", icon: Home },
@@ -127,9 +138,9 @@ export function Footer() {
               <li key={href}>
                 <Link
                   href={href}
-                  className="group flex items-center gap-2 transition hover:text-purple-600"
+                  className="group flex items-center gap-2 text-muted-foreground transition hover:text-primary"
                 >
-                  <Icon className="h-4 w-4 text-gray-400 group-hover:text-purple-500" />
+                  <Icon className="h-3.5 w-3.5 group-hover:text-primary" />
                   {label}
                 </Link>
               </li>
@@ -141,20 +152,17 @@ export function Footer() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 0.7 }}
         >
-          <h3 className="mb-3 text-lg font-semibold text-purple-700">Legal</h3>
+          <h3 className="mb-3 text-base font-semibold text-foreground">Legal</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link
-                href="/privacy"
-                className="transition hover:text-purple-600"
-              >
+              <Link href="/privacy" className="text-muted-foreground transition hover:text-primary">
                 Privacy Policy
               </Link>
             </li>
             <li>
-              <Link href="/terms" className="transition hover:text-purple-600">
+              <Link href="/terms" className="text-muted-foreground transition hover:text-primary">
                 Terms of Service
               </Link>
             </li>
@@ -162,66 +170,37 @@ export function Footer() {
         </motion.div>
       </div>
 
-      {/* Social Media Links */}
+      {/* Social */}
       <motion.div
-        className="flex justify-center gap-6 py-6"
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
+        className="flex justify-center gap-4 py-4"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
       >
-        <Link
-          href="https://www.instagram.com/gaming_zone.world/#"
-          target="_blank"
-          className="transform text-gray-500 transition hover:scale-110 hover:text-pink-600"
-        >
-          <Instagram className="h-6 w-6" />
-        </Link>
-        <Link
-          href="https://www.facebook.com/JaYShriRAM9p/"
-          target="_blank"
-          className="transform text-gray-500 transition hover:scale-110 hover:text-blue-600"
-        >
-          <Facebook className="h-6 w-6" />
-        </Link>
-        <Link
-          href="https://youtube.com/@makemoneydailyathome?si=z0VSaHnO65Uu6HtF"
-          target="_blank"
-          className="transform text-gray-500 transition hover:scale-110 hover:text-red-600"
-        >
-          <Youtube className="h-6 w-6" />
-        </Link>
-        <Link
-          href="https://www.linkedin.com/in/chetan-solanki-66a6842b5/"
-          target="_blank"
-          className="transform text-gray-500 transition hover:scale-110 hover:text-blue-700"
-        >
-          <Linkedin className="h-6 w-6" />
-        </Link>
-
-        {/* Github */}
-        <Link
-          href="https://github.com/ChetaN7895"
-          target="_blank"
-          className="transform text-gray-500 transition hover:scale-110 hover:text-blue-700"
-        >
-          <Github className="h-6 w-6" />
-        </Link>
+        {[
+          { href: "https://www.instagram.com/gaming_zone.world/#", icon: Instagram, color: "hover:text-pink-500" },
+          { href: "https://www.facebook.com/JaYShriRAM9p/", icon: Facebook, color: "hover:text-blue-500" },
+          { href: "https://youtube.com/@makemoneydailyathome", icon: Youtube, color: "hover:text-red-500" },
+          { href: "https://www.linkedin.com/in/chetan-solanki-66a6842b5/", icon: Linkedin, color: "hover:text-blue-600" },
+          { href: "https://github.com/ChetaN7895", icon: Github, color: "hover:text-foreground" },
+        ].map(({ href, icon: Icon, color }) => (
+          <Link
+            key={href}
+            href={href}
+            target="_blank"
+            className={`rounded-xl p-2 text-muted-foreground transition-all duration-150 hover:bg-secondary ${color} active:scale-90`}
+          >
+            <Icon className="h-5 w-5" />
+          </Link>
+        ))}
       </motion.div>
 
       {/* Copyright */}
-      <motion.div
-        className="border-t py-4 text-center text-sm text-gray-500"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 1 }}
-      >
+      <div className="border-t border-border/50 py-4 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()}{" "}
-        <span className="font-semibold text-purple-700">
-          Insta Reel Downloader
-        </span>
+        <span className="font-semibold gradient-text">Insta Reel Downloader</span>
         . All rights reserved.
-      </motion.div>
+      </div>
     </footer>
   );
 }
-
